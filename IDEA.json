@@ -1,0 +1,62 @@
+{
+  "name": "Readline",
+  "slug": "readline-reading-deadlines",
+  "tagline": "Finish every library loan and book-club pick on time: your daily page target, recalculated as you read.",
+  "problem": "Readers juggling library due dates and book-club meetings work out by hand how many pages a day they need, and redo the math every time they fall behind or skip a day. A StoryGraph feature request (Feb 2026) asks for exactly this 'pages per day to finish by date / by book club meeting' calculator, and a Modern Mrs Darcy thread is full of readers who over-borrow, forget due dates, feel anxious about fines, or avoid starting a book because they doubt they can finish it in time. Existing trackers like Bookly and Bookmory focus on logging and put streaks and stats behind subscriptions; none of them plan reading around deadlines across several books at once.",
+  "evidence": [
+    {
+      "source": "https://roadmap.thestorygraph.com/requests-ideas/posts/pages-for-book-club-calculator",
+      "note": "User request: calculate pages/day needed to finish by a date or to be caught up by book-club meeting; currently 'do this by hand and recalculate often'. Another commenter wants the same for library due dates."
+    },
+    {
+      "source": "https://modernmrsdarcy.com/library-due-dates-deadlines/",
+      "note": "Readers say they forget due dates, leave with more books than they can finish in two weeks, feel 'on edge' when overdue, and skip starting books they doubt they can finish before the due date. Others say deadlines motivate them."
+    },
+    {
+      "source": "https://justuseapp.com/en/app/1515533482/bookmory-book-tracker/reviews",
+      "note": "Bookmory reviewers complain that premium costs $30/yr, most features are paywalled or need ads, and they worry about tracking."
+    },
+    {
+      "source": "https://apps.apple.com/us/app/id1085047737",
+      "note": "Bookly reviewers ask for a one-time purchase instead of a subscription; streaks are paywalled and the free tier caps you at 10 books."
+    },
+    {
+      "source": "https://www.omnicalculator.com/reading/reading-time",
+      "note": "Standalone reading-time calculators exist but are one-off: they don't remember your books, progress, or multiple deadlines."
+    }
+  ],
+  "target_users": "Library borrowers (physical and Libby-style loans), book-club members, students with assigned reading, and anyone who reads to a deadline and wants a private, ad-free, offline planner.",
+  "core_features": [
+    "Deadline books: add a book with title, author, total pages (or a page range such as 'chapters 1-12 = pp. 1-210' for book-club checkpoints), current page, start date, deadline, and type (Library loan / Book club / Class / Personal goal). Optionally add which days you read (e.g. weekdays only) and a 'buffer days' setting that finishes N days early.",
+    "Live daily target: each book shows today's pages needed and a 'read to page X today' marker, computed as remaining pages divided by remaining reading days. The target recalculates when you log progress or miss a day. Each book gets a status chip: On track / Ahead by N pages / Behind (catch-up target) / Impossible at your pace.",
+    "Quick progress logging: tap a book, type the page you stopped at (or press +10/+25), and it saves a session with a timestamp. The app estimates your personal pages-per-minute from sessions with an optional built-in timer, then shows the time each daily target should take, e.g. '32 pages \u2248 41 min'.",
+    "Triage across all books: one screen sums today's pages across every active deadline and checks whether your recent average pace can finish everything. If not, it says which book is at risk and suggests: read X first, renew Y (shift its deadline by +14/+21 days with one tap and log the renewal), or return Z unread. It also gives a 'Can I take this on?' check: before adding a new loan, enter its pages and due date to see whether it fits alongside your current load.",
+    "Plan calendar: a 14-day strip/grid showing pages per day per book (color-coded), deadline flags, and overdue warnings. Days you hit the target get a check, and you get a gentle streak count plus a vibration and toast when you finish a book.",
+    "Shelf history and export: finished, returned, and abandoned books with finish date vs deadline, average pages/day, and simple stats (books finished on time %, total pages this month). Share a text summary through the native share bridge, and export/import all data as JSON text for backup."
+  ],
+  "screens": [
+    "Today: total pages due today across all books, a card per active book (cover-color swatch, progress bar, 'read to p. X', time estimate, status chip), one-tap log button, and an at-risk banner when triage finds a problem.",
+    "Add/Edit Book: form with title, author, pages, current page, deadline date picker, type, reading days toggles, buffer days, color. Shows a live preview of the required pages/day as you type, plus the 'Can I take this on?' verdict.",
+    "Book Detail: progress ring, deadline countdown, session log list, pace chart (pages per day bar sparkline), renew button (+N days), mark Finished / Returned unread / Abandoned, session timer.",
+    "Triage / Plan: 14-day calendar grid of planned pages per book, feasibility verdict, suggestions list (read first / renew / return).",
+    "Shelf: history of completed and returned books with on-time badges and monthly stats, plus share summary.",
+    "Settings: default reading days, default buffer, default loan length (for renew), theme toggle, export/import JSON, reset data."
+  ],
+  "data_model": "localStorage key 'readline.v1' holds a JSON object: { settings: { readingDays: [0-6 booleans], bufferDays, loanLengthDays, theme }, books: [ { id, title, author, color, type: 'library'|'club'|'class'|'goal', startPage, endPage, currentPage, createdAt, deadline (YYYY-MM-DD), readingDays|null (override), bufferDays|null, status: 'active'|'finished'|'returned'|'abandoned', finishedAt|null, renewals: [ { date, oldDeadline, newDeadline } ], checkpoints: [ { page, date, label } ] (book-club sections) } ], sessions: [ { id, bookId, date, fromPage, toPage, minutes|null } ], streak: { current, best, lastHitDate } }. Pace (pages/min, pages/day) and daily targets are derived, not stored.",
+  "design": {
+    "bg": "#F6F1E7",
+    "accent": "#C2410C",
+    "vibe": "A warm paper-and-ink look like a library date-due slip: cream background, deep ink text (#1F2937), burnt-orange accent for targets and deadlines, and a muted sage (#4D7C5B) for 'on track'. Serif display headings (Georgia-like) with clean sans body text. Rounded cards with subtle paper shadows. Deadline chips look like stamped due dates in a monospace font. Large tappable numbers for 'read to page X'. Include a dark mode with an espresso background (#1C1917) and the same accent."
+  },
+  "test_scenarios": [
+    "Add a library book of 300 pages, current page 0, due in 10 days, all days are reading days, buffer 0. Today's target shows 30 pages and 'read to p. 30'. Log page 50, and tomorrow's target recalculates to 250/9 \u2248 28 pages; the status shows 'Ahead'.",
+    "Set reading days to weekdays only with a 2-day buffer. The pages/day target only counts weekday days before the deadline minus 2, and weekend days on the calendar show 0 planned pages.",
+    "Add a book whose deadline is tomorrow with 400 pages left. Its status shows 'Impossible at your pace' (or a very high target), and triage suggests renewing. Tap Renew +14 days: the deadline moves, a renewal entry appears in Book Detail, and the target drops.",
+    "Create three overlapping books. The Today screen sums total pages due today correctly. Use 'Can I take this on?' with a 500-page book due in 5 days and confirm it returns a 'won't fit' verdict naming the conflict.",
+    "Book-club checkpoints: add checkpoint p.120 for a meeting in 4 days. The daily target aims at the checkpoint (120 minus current, divided by days), not at the full book.",
+    "Start the session timer, wait, stop, and log 20 pages. The pages-per-minute estimate updates and target cards show a time estimate.",
+    "Mark a book Finished before its deadline. It moves to Shelf with an 'on time' badge, a vibration and toast fire, and on-time % stats update. Mark another 'Returned unread' and confirm it is excluded from finished counts.",
+    "Reload the app and confirm all books, sessions, renewals, and settings persist. Export JSON, reset data, import the JSON, and confirm everything is restored.",
+    "Edge cases: entering a current page greater than total pages, a deadline in the past, or empty title shows inline validation; a book with 0 pages remaining automatically prompts to mark it finished."
+  ]
+}
